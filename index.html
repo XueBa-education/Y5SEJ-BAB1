@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>马来西亚历史拖拽填空游戏</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .game-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border: 2px solid #4D96FF;
+        }
+        
+        h1 {
+            color: #4D96FF;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .player-name {
+            margin-bottom: 15px;
+        }
+        
+        .player-name input {
+            font-family: "Arial", sans-serif;
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 2px solid #4D96FF;
+            border-radius: 15px;
+            text-align: center;
+            color: #333;
+            width: 60%;
+            max-width: 200px;
+        }
+        
+        .selector-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .grade-selector, .unit-selector {
+            width: 48%;
+        }
+        
+        .grade-btn, .unit-btn {
+            background-color: #4D96FF;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 8px 12px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .grade-btn:hover, .unit-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .unit-btn.active {
+            background-color: #6BCB77;
+        }
+        
+        .problem-container {
+            margin: 20px 0;
+            font-size: 18px;
+            color: #333;
+            min-height: 40px;
+            text-align: left;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .blank-space {
+            display: inline-block;
+            width: 150px;
+            height: 40px;
+            border: 2px dashed #4D96FF;
+            border-radius: 5px;
+            margin: 0 5px;
+            vertical-align: middle;
+            background-color: #f0f8ff;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .option {
+            padding: 8px 15px;
+            border: 2px solid #4D96FF;
+            border-radius: 15px;
+            cursor: move;
+            transition: all 0.2s;
+            background-color: white;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .option:hover {
+            background-color: #e6f0ff;
+        }
+        
+        .option.dragging {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+        
+        .blank-space.highlight {
+            background-color: #e6f7ff;
+            border-color: #6BCB77;
+        }
+        
+        .blank-space.correct {
+            background-color: #d4edda;
+            border-color: #6BCB77;
+        }
+        
+        .blank-space.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .submit-btn {
+            background-color: #6BCB77;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .score {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #4D96FF;
+        }
+        
+        .level {
+            font-size: 20px;
+            color: #4D96FF;
+            margin: 5px 0;
+        }
+        
+        .feedback {
+            font-size: 18px;
+            margin: 10px 0;
+            min-height: 24px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .feedback.correct {
+            color: #155724;
+            background-color: #d4edda;
+            animation: bounce 0.5s;
+        }
+        
+        .feedback.incorrect {
+            color: #721c24;
+            background-color: #f8d7da;
+            animation: shake 0.5s;
+        }
+        
+        .explanation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 16px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid #4D96FF;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .history {
+            margin-top: 20px;
+            border-top: 2px dashed #dee2e6;
+            padding-top: 15px;
+        }
+        
+        .history h3 {
+            color: #4D96FF;
+        }
+        
+        .history-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .history-btn {
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+        
+        .history-btn.active {
+            background-color: #4D96FF;
+            color: white;
+        }
+        
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .history-item {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .history-correct {
+            color: #155724;
+        }
+        
+        .history-incorrect {
+            color: #721c24;
+        }
+        
+        .summary {
+            display: none;
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #4D96FF;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #4D96FF;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .pronounce-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #4D96FF;
+            padding: 0;
+            margin-left: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timer {
+            font-size: 18px;
+            color: #4D96FF;
+            margin: 10px 0;
+        }
+        
+        .question-text {
+            display: inline;
+        }
+        
+        .voice-status {
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .voice-unsupported {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .voice-supported {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .voice-loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>📜 马来西亚历史拖拽填空游戏 📜</h1>
+        <p class="subtitle">填写名字并选择年级和单元开始挑战吧！</p>
+
+        <div class="player-name">
+            <input type="text" id="player-name" placeholder="输入你的名字" maxlength="10">
+        </div>
+        
+        <div class="selector-container">
+            <div class="grade-selector">
+                <h3>年级选择</h3>
+                <button class="grade-btn" data-grade="5">五年级</button>
+            </div>
+            
+            <div class="unit-selector">
+                <h3>单元选择</h3>
+                <div id="unit-buttons">
+                    <p>请先选择年级</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timer" id="timer">时间: 0秒</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div id="voice-status" class="voice-status voice-loading">正在初始化语音功能...</div>
+        
+        <div class="level" id="level">关卡: 1/10</div>
+        <div class="score" id="score">得分: 0</div>
+        
+        <div class="problem-container" id="problem-container">
+            <div>请选择年级和单元</div>
+        </div>
+        
+        <div class="options-container" id="options-container"></div>
+        
+        <button class="submit-btn" id="submit-answer" disabled>提交答案</button>
+        
+        <div class="feedback" id="feedback"></div>
+        <div class="explanation" id="explanation"></div>
+        
+        <div class="summary" id="summary">
+            <h3>🎉 <span id="summary-player">玩家</span> 恭喜通关！ 🎉</h3>
+            <p>你完成了所有关卡！</p>
+            <p id="final-score">最终得分: 0</p>
+            <p id="correct-rate">正确率: 0%</p>
+            <p id="time-used">用时: 0秒</p>
+            <button id="play-again">再玩一次</button>
+        </div>
+        
+        <div class="history">
+            <h3>📝 答题历史</h3>
+            <div class="history-controls">
+                <button class="history-btn active" id="show-all">全部</button>
+                <button class="history-btn" id="show-correct">正确</button>
+                <button class="history-btn" id="show-incorrect">错误</button>
+            </div>
+            <div class="history-list" id="history-list">
+                <p>还没有答题记录哦~</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态变量
+        let score = 0;
+        let currentProblem = "";
+        let correctAnswer = "";
+        let history = [];
+        let grade = 0;
+        let unit = '';
+        let currentLevel = 1;
+        const maxLevel = 10;
+        let usedProblems = [];
+        let startTime;
+        let timer;
+        let playerName = '玩家';
+        let historyFilter = 'all';
+        let blankSpaces = [];
+        let draggedOption = null;
+        let elapsedSeconds = 0;
+        
+        // 语音状态变量
+        let isSpeechSupported = false;
+        let chineseVoiceAvailable = false;
+        let voicesLoaded = false;
+        
+        // 单元配置
+        const unitConfig = {
+            '5': ['1.1 君主是政府的首脑', '1.2 州的保护伞', '1.3 效忠君主', '1.4 君臣协议']
+        };
+        
+        // 五年级题目库
+        const historyDragQuestions = {
+            '1.1 君主是政府的首脑': [
+                {
+                    question: "州元首由______委任。",
+                    options: ["苏丹", "国家元首", "首相", "州务大臣"],
+                    answer: "国家元首",
+                    explanation: "根据马来西亚宪法，州元首（如苏丹或拉惹）的任命需由国家最高元首（Yang di-Pertuan Agong）确认。"
+                },
+                {
+                    question: "______或苏丹是州政府的首脑。",
+                    options: ["拉惹", "国王", "总统", "州长"],
+                    answer: "拉惹",
+                    explanation: "在君主制州属（如森美兰、玻璃市），州政府首脑的称号为'拉惹'（Raja）或'苏丹'（Sultan）。"
+                },
+                {
+                    question: "马来西亚共有______个州属实行君主制度。",
+                    options: ["九", "十三", "七", "五"],
+                    answer: "九",
+                    explanation: "全国13个州中，9个州保留世袭君主制（柔佛、吉打等），其余4州（马六甲、槟城等）由州元首（非世袭）治理。"
+                },
+                {
+                    question: "君主制度源于______的马来王国传统。",
+                    options: ["早期", "后期", "现代", "殖民时期"],
+                    answer: "早期",
+                    explanation: "马来西亚的君主制可追溯至15世纪马六甲王朝，后受印度文化影响形成'拉惹'体系。"
+                },
+                {
+                    question: "______指的是君主统治的州属或国家。",
+                    options: ["拉惹", "政府", "议会", "内阁"],
+                    answer: "拉惹",
+                    explanation: "'拉惹'一词广义指君主统治的领土（如森美兰的'拉惹制度'），狭义即君主本人。"
+                },
+                {
+                    question: "我国的君主制度始于早期的______时代。",
+                    options: ["马来王国", "殖民", "独立", "现代"],
+                    answer: "马来王国",
+                    explanation: "马来西亚君主制（如苏丹制度）源自15世纪马来王朝（如马六甲苏丹国）的传统统治体系。"
+                },
+                {
+                    question: "政府指的是君主所统治的______或国家。",
+                    options: ["州属", "城市", "地区", "乡村"],
+                    answer: "州属",
+                    explanation: "在君主制州属（如柔佛、雪兰莪），政府由苏丹或拉惹作为象征首脑，实际行政由州务大臣（Menteri Besar）执行。"
+                },
+                {
+                    question: "在君主制度下，拉惹或苏丹是政府的______。",
+                    options: ["首脑", "成员", "顾问", "代表"],
+                    answer: "首脑",
+                    explanation: "苏丹/拉惹是州属的法定统治者（Head of State），但日常行政由民选政府负责，形成'君主立宪制'。"
+                },
+                {
+                    question: "君主制度是国家的象征，也是我国重要的______之一。",
+                    options: ["遗产", "法律", "政策", "计划"],
+                    answer: "遗产",
+                    explanation: "君主制被列为马来西亚国家文化遗产（如宪法第181条），体现历史延续性与民族团结。"
+                },
+                {
+                    question: "早期马来王国的______是位高权重的拉惹或苏丹，也是该州人民的______。",
+                    options: ["统治者；保护伞", "领袖；仆人", "官员；朋友", "代表；伙伴"],
+                    answer: "统治者；保护伞",
+                    explanation: "苏丹/拉惹是马来王国的最高统治者。君主传统上被视为人民的'保护者'（如提供法律庇护、领导宗教事务）。"
+                }
+            ],
+            '1.2 州的保护伞': [
+                {
+                    question: "州元首由______委任。",
+                    options: ["苏丹", "国家元首", "首相", "州务大臣"],
+                    answer: "国家元首",
+                    explanation: "根据马来西亚宪法，州元首（如马六甲、槟城等非君主州）由最高元首（国家元首）委任。"
+                },
+                {
+                    question: "______或苏丹是政府的首脑。",
+                    options: ["拉惹", "国王", "总统", "州长"],
+                    answer: "拉惹",
+                    explanation: "在君主制州属（如玻璃市、森美兰），政府首脑的称号为'拉惹'或'苏丹'，马来西亚不使用'国王'一词。"
+                },
+                {
+                    question: "我国共有______个州属实行君主制度。",
+                    options: ["九", "十三", "七", "五"],
+                    answer: "九",
+                    explanation: "全国13个州中，9个保留世袭君主制（柔佛、吉打等），其余4州由州元首治理。"
+                },
+                {
+                    question: "君主制度源于______的马来王国。",
+                    options: ["早期", "后期", "现代", "殖民时期"],
+                    answer: "早期",
+                    explanation: "君主制可追溯至15世纪马六甲王朝，属马来王国早期传统。"
+                },
+                {
+                    question: "______指的是君主统治的州属或国家。",
+                    options: ["拉惹", "政府", "议会", "内阁"],
+                    answer: "拉惹",
+                    explanation: "'拉惹'广义指君主统治的领土（如森美兰），'政府'指行政机构，二者不同。"
+                },
+                {
+                    question: "______是纳闽联邦直辖市的统治者。",
+                    options: ["苏丹", "国家元首", "首相", "市长"],
+                    answer: "国家元首",
+                    explanation: "联邦直辖区（纳闽、吉隆坡、布城）由最高元首直接管辖，无地方君主。"
+                },
+                {
+                    question: "森美兰州的统治者被称为______。",
+                    options: ["苏丹", "最高统治者", "国王", "州长"],
+                    answer: "最高统治者",
+                    explanation: "森美兰采用独特称号'严端/Yang di-Pertuan Besar'，源于历史上的部落联盟制度。"
+                },
+                {
+                    question: "玻璃市的首脑称为______。",
+                    options: ["州元首", "拉惹", "苏丹", "统治者"],
+                    answer: "拉惹",
+                    explanation: "玻璃市是君主制州属，其统治者为'拉惹'，非'州元首'（后者用于非君主州）。"
+                },
+                {
+                    question: "在没有苏丹或拉惹的州属，州元首是由______委任的。",
+                    options: ["国家元首", "首相", "议会", "人民"],
+                    answer: "国家元首",
+                    explanation: "如马六甲、槟城等州的州元首（Governor）由最高元首任命。"
+                },
+                {
+                    question: "雪兰莪州和彭亨州的统治者是______。",
+                    options: ["苏丹", "拉惹", "最高统治者", "州长"],
+                    answer: "苏丹",
+                    explanation: "两州均采用'苏丹'称号，如现任雪兰莪苏丹沙拉弗丁殿下。"
+                }
+            ],
+            '1.3 效忠君主': [
+                {
+                    question: "《______》中记载了君主与人民的协议。",
+                    options: ["马来纪年", "联邦宪法", "国家原则", "独立宣言"],
+                    answer: "马来纪年",
+                    explanation: "《马来纪年》（Sulalatus Salatin）是记载马来王朝历史的重要文献。"
+                },
+                {
+                    question: "______与人民之间的协议，是建立效忠行为的基础。",
+                    options: ["君主", "首相", "州务大臣", "议会"],
+                    answer: "君主",
+                    explanation: "协议双方为君主（斯里德里布阿纳）和人民代表（德芒乐巴尔达温）。"
+                },
+                {
+                    question: "人民______答应效忠君主，君主则公正无私地统治人民。",
+                    options: ["德芒乐巴尔达温", "斯里德里布阿纳", "首相", "州务大臣"],
+                    answer: "德芒乐巴尔达温",
+                    explanation: "德芒乐巴尔达温作为人民代表与君主立约。"
+                },
+                {
+                    question: "协议中蕴含了______与背叛的概念。",
+                    options: ["君权", "民权", "政权", "法权"],
+                    answer: "君权",
+                    explanation: "君权（daulat）指君主神圣权威，背叛（derhaka）即违反效忠誓言。"
+                },
+                {
+                    question: "该协议确立了马来传统政治中______与义务的相互关系。",
+                    options: ["效忠", "权利", "自由", "平等"],
+                    answer: "效忠",
+                    explanation: "人民效忠君主，君主保障公正统治，形成双向责任。"
+                },
+                {
+                    question: "斯里德里布阿纳是马来文献记载中的______象征。",
+                    options: ["君权", "民权", "政权", "法权"],
+                    answer: "君权",
+                    explanation: "其名意为'光荣的君主'，代表马来君主的神圣性。"
+                },
+                {
+                    question: "德芒乐巴尔达温的名字意为'______的使者'。",
+                    options: ["人民", "君主", "国家", "宗教"],
+                    answer: "人民",
+                    explanation: "'Demang Lebar Daun'直译为'宽叶首领'，象征人民代表。"
+                },
+                {
+                    question: "违反效忠协议的行为称为______。",
+                    options: ["derhaka", "daulat", "khianat", "menderhaka"],
+                    answer: "derhaka",
+                    explanation: "背叛君主在马来文化中是最严重的罪行之一。"
+                },
+                {
+                    question: "君主若违背公正统治原则，则可能失去______。",
+                    options: ["daulat", "derhaka", "kuasa", "kedudukan"],
+                    answer: "daulat",
+                    explanation: "马来政治哲学强调君权以德行为基础。"
+                },
+                {
+                    question: "《马来纪年》记载的这一协议成为马来______制度的典范。",
+                    options: ["君臣", "民主", "联邦", "共和"],
+                    answer: "君臣",
+                    explanation: "该协议奠定了传统马来社会'效忠-庇护'关系模式。"
+                }
+            ],
+            '1.4 君臣协议': [
+                {
+                    question: "君权（daulat）象征君主的______权力，要求君主具备______、______和______的品德。",
+                    options: ["执政；贤明；睿智管理；高尚", "立法；公正；勇敢；仁慈", "司法；智慧；宽容；坚定", "行政；聪明；耐心；谦虚"],
+                    answer: "执政；贤明；睿智管理；高尚",
+                    explanation: "君权体现君主统治的合法性，需以德治国。"
+                },
+                {
+                    question: "背叛（derhaka）指人民______君主的命令，违者将受______。",
+                    options: ["违背；惩罚", "遵守；奖励", "忽视；警告", "支持；保护"],
+                    answer: "违背；惩罚",
+                    explanation: "背叛是破坏君臣契约的行为。"
+                },
+                {
+                    question: "维护君主制度的方法包括：______、______和悬挂元首肖像。",
+                    options: ["庆祝苏丹华诞；各族人民团结一致", "参加选举；遵守法律", "纳税；服兵役", "学习历史；保护文物"],
+                    answer: "庆祝苏丹华诞；各族人民团结一致",
+                    explanation: "通过仪式与团结强化制度认同。"
+                },
+                {
+                    question: "《______》记载了君主与人民的协议，确立______必须效忠、______必须公正的双向责任。",
+                    options: ["马来纪年；人民；君主", "联邦宪法；公民；政府", "国家原则；人民；国家", "独立宣言；民族；领袖"],
+                    answer: "马来纪年；人民；君主",
+                    explanation: "该文献是马来政治哲学的基础。"
+                },
+                {
+                    question: "象征君主权力的正确选项是______。",
+                    options: ["君权", "民权", "政权", "法权"],
+                    answer: "君权",
+                    explanation: "'daulat'专指君主神圣统治权，与'民权'对立。"
+                },
+                {
+                    question: "君臣协议反映在国家原则______中。",
+                    options: ["忠于君国", "尊崇法治", "培养德行", "维护宪法"],
+                    answer: "忠于君国",
+                    explanation: "国家原则第五条明确效忠君主与国家的义务。"
+                },
+                {
+                    question: "记载协议的文献是______。",
+                    options: ["《马来纪年》", "《联邦宪法》", "《国家原则》", "《独立宣言》"],
+                    answer: "《马来纪年》",
+                    explanation: "该文献记录斯里德里布阿纳与德芒乐巴尔达温的契约。"
+                },
+                {
+                    question: "背叛指人民______君主命令。",
+                    options: ["违逆", "遵守", "忽视", "支持"],
+                    answer: "违逆",
+                    explanation: "'derhaka'特指违抗君主，后果严重。"
+                },
+                {
+                    question: "效忠对象应为______。",
+                    options: ["拉惹或苏丹", "首相", "州务大臣", "议会"],
+                    answer: "拉惹或苏丹",
+                    explanation: "宪法规定君主是效忠核心，非政党或领袖。"
+                },
+                {
+                    question: "君主行使权力依据______。",
+                    options: ["联邦宪法", "州宪法", "习惯法", "宗教法"],
+                    answer: "联邦宪法",
+                    explanation: "现代君主权力受宪法明文限制。"
+                }
+            ]
+        };
+
+        // 初始化语音合成
+        function initSpeechSynthesis() {
+            return new Promise((resolve) => {
+                if (!('speechSynthesis' in window)) {
+                    console.warn("浏览器不支持语音合成API");
+                    updateVoiceStatus(false, "您的浏览器不支持语音功能，请使用Chrome或Edge浏览器");
+                    resolve(false);
+                    return;
+                }
+
+                // 检查语音是否已经加载
+                let voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    checkVoices(voices);
+                    resolve(true);
+                    return;
+                }
+
+                // 语音未加载，设置回调
+                speechSynthesis.onvoiceschanged = function() {
+                    voices = speechSynthesis.getVoices();
+                    if (voices.length > 0) {
+                        checkVoices(voices);
+                        resolve(true);
+                    } else {
+                        console.warn("无法加载语音列表");
+                        updateVoiceStatus(false, "无法加载语音列表，请刷新页面重试");
+                        resolve(false);
+                    }
+                };
+
+                // 某些浏览器需要触发一次getVoices才能激活onvoiceschanged
+                setTimeout(() => {
+                    voices = speechSynthesis.getVoices();
+                    if (voices.length === 0) {
+                        updateVoiceStatus(false, "正在加载语音引擎...");
+                    }
+                }, 100);
+            });
+
+            function checkVoices(voices) {
+                // 寻找中文语音
+                chineseVoiceAvailable = voices.some(voice => 
+                    voice.lang === 'zh-CN' || 
+                    voice.lang === 'cmn-CN' || 
+                    voice.lang.startsWith('zh-')
+                );
+                
+                isSpeechSupported = true;
+                voicesLoaded = true;
+                
+                if (chineseVoiceAvailable) {
+                    updateVoiceStatus(true, "语音功能已启用 (中文)");
+                } else {
+                    updateVoiceStatus(true, "语音功能已启用 (使用默认语音)");
+                }
+            }
+        }
+
+        // 更新语音状态显示
+        function updateVoiceStatus(supported, message) {
+            const voiceStatus = document.getElementById('voice-status');
+            voiceStatus.textContent = message;
+            
+            if (supported) {
+                voiceStatus.className = "voice-status voice-supported";
+            } else {
+                voiceStatus.className = "voice-status voice-unsupported";
+            }
+            
+            voiceStatus.style.display = 'block';
+        }
+
+        // 发音函数 - 强制使用中文发音
+        function pronounceText(text) {
+            if (!isSpeechSupported) {
+                alert("您的浏览器不支持语音功能，请使用Chrome或Edge浏览器");
+                return Promise.resolve();
+            }
+
+            return new Promise((resolve) => {
+                // 取消当前正在播放的语音
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // 设置中文发音参数
+                utterance.lang = 'zh-CN'; // 强制使用中文
+                utterance.rate = 0.9;    // 稍慢的语速
+                utterance.pitch = 1;      // 正常音高
+                utterance.volume = 1;     // 最大音量
+
+                // 获取所有可用语音
+                const voices = window.speechSynthesis.getVoices();
+                
+                // 优先选择中文语音
+                const chineseVoices = voices.filter(v => 
+                    v.lang === 'zh-CN' || 
+                    v.lang === 'cmn-CN' || 
+                    v.lang.startsWith('zh-')
+                );
+                
+                // 如果有中文语音则使用，否则使用默认语音
+                if (chineseVoices.length > 0) {
+                    // 优先选择女性声音（通常更清晰）
+                    const femaleVoice = chineseVoices.find(v => v.name.includes('Female'));
+                    utterance.voice = femaleVoice || chineseVoices[0];
+                } else if (voices.length > 0) {
+                    // 没有中文语音，使用默认语音
+                    utterance.voice = voices.find(v => v.default) || voices[0];
+                    console.warn("未找到中文语音，使用默认语音");
+                }
+
+                utterance.onend = function() {
+                    resolve();
+                };
+
+                utterance.onerror = function(event) {
+                    console.error('发音错误:', event.error);
+                    alert("发音失败，请确保浏览器允许语音功能");
+                    resolve();
+                };
+
+                try {
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.error("发音失败:", e);
+                    alert("发音失败，请点击页面任意位置后重试");
+                    resolve();
+                }
+            });
+        }
+
+        // 设置发音按钮事件
+        function setupPronounceButtons() {
+            document.querySelectorAll('.pronounce-btn').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    
+                    // 获取要朗读的文本
+                    let text = '';
+                    if (this.parentElement.classList.contains('option')) {
+                        // 选项按钮
+                        text = this.nextSibling.textContent;
+                    } else {
+                        // 问题按钮
+                        text = this.previousSibling.textContent;
+                    }
+                    
+                    if (text.trim()) {
+                        this.disabled = true;
+                        this.innerHTML = '⌛';
+                        await pronounceText(text);
+                        this.innerHTML = '🔊';
+                        this.disabled = false;
+                    }
+                });
+            });
+        }
+
+        // 根据年级和单元生成题目
+        function generateProblem() {
+            if (grade === 0 || unit === '' || currentLevel > maxLevel) return;
+            
+            let questions = historyDragQuestions[unit];
+            
+            // 确保题目不重复
+            let questionIndex;
+            do {
+                questionIndex = Math.floor(Math.random() * questions.length);
+            } while (usedProblems.includes(questionIndex) && usedProblems.length < questions.length);
+            
+            if (usedProblems.length >= questions.length) {
+                // 所有题目都已使用过
+                endGame(true);
+                return;
+            }
+            
+            usedProblems.push(questionIndex);
+            const question = questions[questionIndex];
+            
+            currentProblem = question.question;
+            correctAnswer = question.answer;
+            
+            // 显示题目
+            const problemContainer = document.getElementById('problem-container');
+            problemContainer.innerHTML = '';
+            
+            // 创建题目文本，将空白处替换为可拖拽区域
+            const questionParts = currentProblem.split('______');
+            const blankSpace = document.createElement('span');
+            blankSpace.className = 'blank-space';
+            blankSpace.dataset.correctAnswer = correctAnswer;
+            
+            // 添加拖拽事件
+            blankSpace.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('highlight');
+            });
+            
+            blankSpace.addEventListener('dragleave', function() {
+                this.classList.remove('highlight');
+            });
+            
+            blankSpace.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('highlight');
+                
+                const draggedText = e.dataTransfer.getData('text/plain');
+                this.textContent = draggedText;
+                this.dataset.userAnswer = draggedText;
+                
+                // 检查是否所有空白都已填写
+                checkAllBlanksFilled();
+            });
+            
+            // 添加第一部分问题和发音按钮
+            const firstPartContainer = document.createElement('span');
+            firstPartContainer.className = 'question-text';
+            
+            const firstPartText = document.createTextNode(questionParts[0]);
+            firstPartContainer.appendChild(firstPartText);
+            
+            if (questionParts[0].trim()) {
+                const pronounceFirstBtn = document.createElement('button');
+                pronounceFirstBtn.className = 'pronounce-btn';
+                pronounceFirstBtn.innerHTML = '🔊';
+                pronounceFirstBtn.title = '朗读题目';
+                firstPartContainer.appendChild(pronounceFirstBtn);
+            }
+            
+            problemContainer.appendChild(firstPartContainer);
+            problemContainer.appendChild(blankSpace);
+            
+            // 如果有第二部分问题
+            if (questionParts.length > 1) {
+                const secondPartContainer = document.createElement('span');
+                secondPartContainer.className = 'question-text';
+                
+                const secondPartText = document.createTextNode(questionParts[1]);
+                secondPartContainer.appendChild(secondPartText);
+                
+                if (questionParts[1].trim()) {
+                    const pronounceSecondBtn = document.createElement('button');
+                    pronounceSecondBtn.className = 'pronounce-btn';
+                    pronounceSecondBtn.innerHTML = '🔊';
+                    pronounceSecondBtn.title = '朗读题目';
+                    secondPartContainer.appendChild(pronounceSecondBtn);
+                }
+                
+                problemContainer.appendChild(secondPartContainer);
+            }
+            
+            // 存储空白区域引用
+            blankSpaces = [blankSpace];
+            
+            // 显示解析
+            document.getElementById('explanation').textContent = question.explanation;
+            document.getElementById('explanation').style.display = 'none';
+            
+            // 创建可拖拽选项
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            // 随机排序选项
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.draggable = true;
+                optionElement.dataset.option = option;
+                
+                // 添加发音按钮
+                const pronounceBtn = document.createElement('button');
+                pronounceBtn.className = 'pronounce-btn';
+                pronounceBtn.innerHTML = '🔊';
+                pronounceBtn.title = '朗读选项';
+                
+                // 添加选项文本
+                const optionText = document.createElement('span');
+                optionText.textContent = option;
+                
+                // 添加拖拽事件
+                optionElement.addEventListener('dragstart', function(e) {
+                    draggedOption = this;
+                    e.dataTransfer.setData('text/plain', this.dataset.option);
+                    this.classList.add('dragging');
+                });
+                
+                optionElement.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+                
+                // 组装选项元素
+                optionElement.appendChild(pronounceBtn);
+                optionElement.appendChild(optionText);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // 设置发音按钮事件
+            setupPronounceButtons();
+            
+            // 自动朗读完整问题（可选）
+            if (isSpeechSupported) {
+                setTimeout(() => {
+                    pronounceText(currentProblem.replace('______', '空白'));
+                }, 500);
+            }
+            
+            // 更新进度条
+            updateProgressBar();
+        }
+
+        // 检查所有空白是否已填写
+        function checkAllBlanksFilled() {
+            const allFilled = blankSpaces.every(blank => blank.textContent.trim() !== '');
+            document.getElementById('submit-answer').disabled = !allFilled;
+        }
+        
+        // 检查答案
+        function checkAnswer() {
+            let allCorrect = true;
+            
+            blankSpaces.forEach(blank => {
+                const userAnswer = blank.dataset.userAnswer;
+                const isCorrect = userAnswer === blank.dataset.correctAnswer;
+                
+                if (isCorrect) {
+                    blank.classList.add('correct');
+                    blank.classList.remove('incorrect');
+                } else {
+                    blank.classList.add('incorrect');
+                    blank.classList.remove('correct');
+                    allCorrect = false;
+                }
+            });
+            
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            
+            if (allCorrect) {
+                feedback.textContent = '正确！太棒了！ 🎉';
+                feedback.className = 'feedback correct';
+                score += 10;
+                document.getElementById('score').textContent = `得分: ${score}`;
+                
+                // 添加到历史记录
+                addHistory(true, blankSpaces[0].dataset.userAnswer);
+                
+                // 显示解析
+                explanation.style.display = 'block';
+                
+                // 进入下一关
+                currentLevel++;
+                document.getElementById('level').textContent = `关卡: ${currentLevel}/${maxLevel}`;
+                
+                if (currentLevel > maxLevel) {
+                    // 通关
+                    setTimeout(() => endGame(true), 1500);
+                } else {
+                    // 生成新题目
+                    setTimeout(() => {
+                        document.getElementById('submit-answer').disabled = true;
+                        generateProblem();
+                    }, 1500);
+                }
+            } else {
+                feedback.textContent = `哎呀，不对哦！正确答案是: ${correctAnswer}`;
+                feedback.className = 'feedback incorrect';
+                explanation.style.display = 'block';
+                
+                // 显示正确答案
+                blankSpaces.forEach(blank => {
+                    blank.textContent = blank.dataset.correctAnswer;
+                });
+                
+                // 添加到历史记录
+                addHistory(false, blankSpaces[0].dataset.userAnswer);
+                
+                // 生成新题目（同一关卡）
+                setTimeout(() => {
+                    document.getElementById('submit-answer').disabled = true;
+                    generateProblem();
+                }, 1500);
+            }
+        }
+        
+        // 更新进度条
+        function updateProgressBar() {
+            const progress = (currentLevel - 1) / maxLevel * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+        
+        // 添加到历史记录
+        function addHistory(isCorrect, userAnswer) {
+            const historyItem = {
+                problem: currentProblem,
+                answer: correctAnswer,
+                userAnswer: userAnswer,
+                isCorrect: isCorrect,
+                time: new Date().toLocaleTimeString()
+            };
+            
+            history.unshift(historyItem);
+            updateHistoryDisplay();
+        }
+        
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p>还没有答题记录哦~</p>';
+            } else {
+                const filteredHistory = history.filter(item => {
+                    if (historyFilter === 'all') return true;
+                    if (historyFilter === 'correct') return item.isCorrect;
+                    if (historyFilter === 'incorrect') return !item.isCorrect;
+                    return true;
+                });
+                
+                if (filteredHistory.length === 0) {
+                    historyList.innerHTML = `<p>没有${historyFilter === 'correct' ? '正确' : '错误'}的答题记录~</p>`;
+                } else {
+                    filteredHistory.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = `history-item ${item.isCorrect ? 'history-correct' : 'history-incorrect'}`;
+                        const icon = item.isCorrect ? '✅' : '❌';
+                        historyItem.innerHTML = `
+                            <strong>${icon} ${item.problem.replace('______', item.userAnswer)}</strong>
+                            <br>
+                            你的答案: ${item.userAnswer} (正确答案: ${item.answer}) (${item.time})
+                        `;
+                        historyList.appendChild(historyItem);
+                    });
+                }
+            }
+        }
+        
+        // 设置历史筛选
+        function setHistoryFilter(filter) {
+            historyFilter = filter;
+            updateHistoryDisplay();
+            
+            document.getElementById('show-all').classList.remove('active');
+            document.getElementById('show-correct').classList.remove('active');
+            document.getElementById('show-incorrect').classList.remove('active');
+            document.getElementById(`show-${filter}`).classList.add('active');
+        }
+        
+        // 更新单元按钮
+        function updateUnitButtons(selectedGrade) {
+            const unitButtonsContainer = document.getElementById('unit-buttons');
+            unitButtonsContainer.innerHTML = '';
+            
+            if (selectedGrade && unitConfig[selectedGrade]) {
+                unitConfig[selectedGrade].forEach(unitName => {
+                    const button = document.createElement('button');
+                    button.className = 'unit-btn';
+                    button.textContent = unitName;
+                    button.dataset.unit = unitName;
+                    button.addEventListener('click', function() {
+                        document.querySelectorAll('.unit-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        unit = this.dataset.unit;
+                        startGame(grade, unit);
+                    });
+                    unitButtonsContainer.appendChild(button);
+                });
+            } else {
+                unitButtonsContainer.innerHTML = '<p>请先选择年级</p>';
+            }
+        }
+        
+        // 更新计时器
+        function updateTimer() {
+            elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+            document.getElementById('timer').textContent = `时间: ${elapsedSeconds}秒`;
+        }
+        
+        // 开始游戏
+        async function startGame(selectedGrade, selectedUnit) {
+            playerName = document.getElementById('player-name').value.trim() || '玩家';
+            document.getElementById('summary-player').textContent = playerName;
+            
+            grade = selectedGrade;
+            unit = selectedUnit || '';
+            score = 0;
+            currentLevel = 1;
+            history = [];
+            usedProblems = [];
+            blankSpaces = [];
+            elapsedSeconds = 0;
+            
+            document.getElementById('score').textContent = `得分: ${score}`;
+            document.getElementById('level').textContent = `关卡: ${currentLevel}/${maxLevel}`;
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('explanation').style.display = 'none';
+            document.getElementById('submit-answer').disabled = true;
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('timer').textContent = '时间: 0秒';
+            
+            // 初始化语音
+            await initSpeechSynthesis();
+            
+            // 开始计时
+            startTime = new Date();
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            generateProblem();
+        }
+        
+        // 结束游戏
+        function endGame(isWin) {
+            clearInterval(timer);
+            window.speechSynthesis.cancel();
+            
+            if (isWin) {
+                const correctCount = history.filter(item => item.isCorrect).length;
+                const accuracy = Math.round((correctCount / history.length) * 100);
+                
+                document.getElementById('final-score').textContent = `最终得分: ${score}`;
+                document.getElementById('correct-rate').textContent = `正确率: ${accuracy}%`;
+                document.getElementById('time-used').textContent = `用时: ${elapsedSeconds}秒`;
+                document.getElementById('summary').style.display = 'block';
+                
+                createCelebration();
+            }
+        }
+        
+        // 创建庆祝效果
+        function createCelebration() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            document.body.appendChild(celebration);
+            
+            // 创建彩色纸屑
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                celebration.appendChild(confetti);
+            }
+            
+            setTimeout(() => celebration.remove(), 5000);
+        }
+        
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 初始化语音
+            await initSpeechSynthesis();
+            
+            // 设置年级选择事件
+            document.querySelectorAll('.grade-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    grade = parseInt(this.dataset.grade);
+                    updateUnitButtons(grade);
+                    document.getElementById('problem-container').textContent = '请选择单元';
+                    document.getElementById('options-container').innerHTML = '';
+                    document.getElementById('submit-answer').disabled = true;
+                });
+            });
+            
+            // 历史筛选按钮
+            document.getElementById('show-all').addEventListener('click', () => setHistoryFilter('all'));
+            document.getElementById('show-correct').addEventListener('click', () => setHistoryFilter('correct'));
+            document.getElementById('show-incorrect').addEventListener('click', () => setHistoryFilter('incorrect'));
+            
+            // 再来一次按钮
+            document.getElementById('play-again').addEventListener('click', function() {
+                startGame(grade, unit);
+            });
+            
+            // 玩家姓名输入
+            document.getElementById('player-name').addEventListener('input', function() {
+                playerName = this.value.trim() || '玩家';
+            });
+            
+            // 提交答案按钮
+            document.getElementById('submit-answer').addEventListener('click', checkAnswer);
+            
+            // 阻止默认拖拽行为
+            document.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            // iOS设备需要用户交互后才能使用语音
+            document.body.addEventListener('click', function initOnClick() {
+                if (!voicesLoaded && isSpeechSupported) {
+                    initSpeechSynthesis();
+                }
+                document.body.removeEventListener('click', initOnClick);
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
